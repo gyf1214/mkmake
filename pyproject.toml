@@ -4,11 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mkmake"
-version = "0.1.0"
+version = "0.1.2"
 description = "Generate project and meta Makefiles with a Python API"
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = []
+
+[project.urls]
+Repository = "https://github.com/gyf1214/mkmake"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

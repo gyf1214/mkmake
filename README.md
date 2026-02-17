@@ -1,6 +1,14 @@
 # mkmake
 
+[![PyPI version](https://img.shields.io/pypi/v/mkmake.svg)](https://pypi.org/project/mkmake/)
+
 `mkmake` is a Python package for generating Makefiles for multiple related C projects from code.
+
+## Installation
+
+```bash
+pip install mkmake
+```
 
 ## Features
 
