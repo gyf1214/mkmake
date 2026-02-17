@@ -2,3 +2,9 @@
 MEMORY.md
 LOCAL.md
 scratch/
+venv/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
