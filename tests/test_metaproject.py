@@ -172,3 +172,66 @@ def test_private_header_opt_in_keeps_transitive_dependency_expansion(tmp_path):
     mk = (test_root / "target" / "Makefile").read_text()
     assert f"{(core / 'src' / 'include' / 'core_priv.h').as_posix()}" in mk
     assert f"{(core / 'target' / 'include' / 'core_pub.h').as_posix()}" in mk
+
+
+def test_duplicate_dependency_header_keeps_transitive_mapping_consistent(tmp_path):
+    dep1 = tmp_path / "dep1"
+    dep2 = tmp_path / "dep2"
+    app = tmp_path / "app"
+
+    for root in [dep1, dep2, app]:
+        (root / "src").mkdir(parents=True)
+        (root / "include").mkdir(parents=True)
+
+    (dep1 / "src" / "dep1.c").write_text(
+        '#include "x.h"\n'
+        "int dep1(void){return 0;}\n"
+    )
+    (dep1 / "include" / "x.h").write_text(
+        '#pragma once\n'
+        '#include "dep1_only.h"\n'
+    )
+    (dep1 / "include" / "dep1_only.h").write_text("#pragma once\n")
+
+    (dep2 / "src" / "dep2.c").write_text(
+        '#include "x.h"\n'
+        "int dep2(void){return 0;}\n"
+    )
+    (dep2 / "include" / "x.h").write_text(
+        '#pragma once\n'
+        '#include "dep2_only.h"\n'
+    )
+    (dep2 / "include" / "dep2_only.h").write_text("#pragma once\n")
+
+    (app / "src" / "main.c").write_text(
+        '#include "x.h"\n'
+        "int main(void){return 0;}\n"
+    )
+    (app / "include" / "main.h").write_text("#pragma once\n")
+
+    projects = {
+        "dep1": CProject(
+            str(dep1),
+            output_name="libdep1.a",
+            output_type=CProject.OutputType.STATIC,
+        ),
+        "dep2": CProject(
+            str(dep2),
+            output_name="libdep2.a",
+            output_type=CProject.OutputType.STATIC,
+        ),
+        "app": CProject(
+            str(app),
+            output_name="app",
+            output_type=CProject.OutputType.BINARY,
+            depends=["dep1", "dep2"],
+        ),
+    }
+
+    make_projects(projects)
+    mk = (app / "target" / "Makefile").read_text()
+
+    # Expect consistent ownership: x.h and its transitive header should both come from dep1.
+    assert f"{(dep1 / 'target' / 'include' / 'x.h').as_posix()}" in mk
+    assert f"{(dep1 / 'target' / 'include' / 'dep1_only.h').as_posix()}" in mk
+    assert f"{(dep2 / 'target' / 'include' / 'dep2_only.h').as_posix()}" not in mk

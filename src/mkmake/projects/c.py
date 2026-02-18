@@ -132,7 +132,9 @@ class CProject(Project):
             for key, value in proj.exports.items():
                 if key not in self.all_deps:
                     self.all_deps[key] = value
-            self.deps.update(proj.deps)
+            for key, value in proj.deps.items():
+                if key not in self.deps:
+                    self.deps[key] = value
 
             lib = proj.output_name
             lib_path = path.join(proj.build_root, lib)
