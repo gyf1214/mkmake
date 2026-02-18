@@ -5,6 +5,8 @@ from .c import CProject
 
 
 class TestProject(CProject):
+    __test__ = False
+
     def __init__(self, root_path: str, **kwargs):
         super().__init__(
             root_path,

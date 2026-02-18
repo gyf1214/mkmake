@@ -7,3 +7,7 @@ def test_public_imports_exist():
     assert CProject
     assert YYProject
     assert TestProject
+
+
+def test_testproject_is_not_collectible_by_pytest():
+    assert getattr(TestProject, "__test__", True) is False
