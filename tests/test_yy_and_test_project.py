@@ -1,4 +1,5 @@
 from mkmake.projects import CProject, TestProject, YYProject
+import pytest
 
 
 def test_yy_project_generates_rules(tmp_path):
@@ -45,3 +46,38 @@ def test_testproject_adds_test_target(tmp_path):
 
     mk = (root / "target" / "Makefile").read_text()
     assert "test: all" in mk
+
+
+def test_testproject_private_depends_must_be_in_depends(tmp_path):
+    root = tmp_path / "test"
+    dep = tmp_path / "dep"
+
+    (root / "src").mkdir(parents=True)
+    (root / "include").mkdir(parents=True)
+    (root / "src" / "main.c").write_text("int main(void){return 0;}\n")
+    (root / "include" / "main.h").write_text("#pragma once\n")
+
+    (dep / "src").mkdir(parents=True)
+    (dep / "include").mkdir(parents=True)
+    (dep / "src" / "dep.c").write_text("int dep(void){return 0;}\n")
+    (dep / "include" / "dep.h").write_text("#pragma once\n")
+
+    projects = {
+        "dep": CProject(
+            str(dep),
+            output_name="libdep.a",
+            output_type=CProject.OutputType.STATIC,
+        ),
+        "test": TestProject(
+            str(root),
+            test_command="python3 -c 'print(0)'",
+            private_depends=["dep"],
+        ),
+    }
+
+    projects["dep"].scan_sources()
+    projects["dep"].inject_depends({})
+    projects["dep"].scan_deps()
+    projects["test"].scan_sources()
+    with pytest.raises(ValueError):
+        projects["test"].inject_depends(projects)

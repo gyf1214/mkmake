@@ -38,6 +38,7 @@ def main(args) -> None:
             test_files=["tests/run.py", "tests/tests.json"],
             std="gnu99",
             depends=["generic", "parser"],
+            private_depends=["generic"],
         ),
     }
     make_projects(projects, debug=args.debug, test=args.test)

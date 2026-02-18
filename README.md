@@ -16,6 +16,7 @@ pip install mkmake
 - Model mixed project types with a shared API (`CProject`, `YYProject`, `TestProject`).
 - Discover and wire header dependencies for C projects.
 - Inject dependency include paths and library linkage across project boundaries.
+- Let `TestProject` opt into dependency private headers for unit-test-only coupling.
 - Configure build variants through `debug` and `test` generation flags.
 
 ## Quick Start
@@ -35,6 +36,22 @@ projects = {
 }
 make_projects(projects, debug=True, test=True)
 ```
+
+If test code needs a dependency's private headers from `src/include`, opt in explicitly:
+
+```python
+"tests": TestProject(
+    "tests",
+    test_command="python3 {0} {1}",
+    depends=["core", "parser"],
+    private_depends=["core"],
+)
+```
+
+Notes:
+- `private_depends` is test-only and should be used sparingly.
+- Every `private_depends` entry must also be present in `depends`.
+- On header basename collisions, local project headers remain authoritative.
 
 Full usage example: `examples/generic_make.py`
 

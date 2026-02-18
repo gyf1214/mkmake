@@ -13,8 +13,26 @@ class TestProject(CProject):
 
         self.test_command = kwargs['test_command']
         self.test_files = kwargs.get('test_files', [])
+        self.private_depends = kwargs.get('private_depends', [])
         self.test_path = path.join(self.build_root, 'tests')
         self.test_output = path.join(self.test_path, 'summary.out')
+
+    def inject_depends(self, projects):
+        super().inject_depends(projects)
+
+        for name in self.private_depends:
+            if name not in self.depends_proj:
+                raise ValueError(
+                    f"Unknown private dependency '{name}', "
+                    f"must also be listed in depends"
+                )
+            dep = self.depends_proj[name]
+            assert isinstance(dep, CProject), "Depends not a CProject"
+
+            self.all_includes.append(dep.internal_path)
+            for key, value in dep.internals.items():
+                if key not in self.all_deps:
+                    self.all_deps[key] = value
 
     def write_target(self, fout: TextIO):
         super().write_target(fout)

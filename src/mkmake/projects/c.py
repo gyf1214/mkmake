@@ -71,16 +71,16 @@ class CProject(Project):
             key: path.join(self.export_path, key)
             for key in self.headers.keys()
         }
-        internals = self.scan_files([self.internal_path], self.header_suffix)
+        self.internals = self.scan_files([self.internal_path], self.header_suffix)
 
         self.all_sources = self.sources.copy()
         self.safe_update(self.all_sources, self.headers)
-        self.safe_update(self.all_sources, internals)
+        self.safe_update(self.all_sources, self.internals)
         self.all_deps = self.all_sources.copy()
         self.deps = {}
         print(f"Found {len(self.sources)} sources, "
               f"{len(self.headers)} headers, "
-              f"{len(internals)} internal headers.")
+              f"{len(self.internals)} internal headers.")
 
     def scan_deps_file(self, source: Optional[str]):
         ret: List[str] = []
