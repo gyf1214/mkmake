@@ -56,8 +56,7 @@ class CProject(Project):
         else:
             self.ld = kwargs.get('ld', 'gcc')
 
-        self.all_includes = self.lib_includes + \
-            [self.include_path, self.internal_path]
+        self.all_includes = [self.include_path, self.internal_path]
 
         self.source_suffix = ['c']
         self.header_suffix = ['h']
@@ -162,7 +161,7 @@ class CProject(Project):
             self.c_flags += ['-fPIC', '-fvisibility=hidden']
         if self.std is not None:
             self.c_flags += [f'-std={self.std}']
-        for inc in self.all_includes:
+        for inc in self.all_includes + self.lib_includes:
             inc = path.abspath(inc)
             if path.commonprefix([self.root_path, inc]) == self.root_path:
                 inc = path.relpath(inc, self.root_path)
